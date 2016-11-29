@@ -10,20 +10,22 @@ import java.util.List;
 @Test
 public class ProducerConsumerIntergrationTest {
 
-    public void testProducerConsumerIntegration() {
+    public void testProducerConsumerIntegration() throws InterruptedException {
         List<Thread> producerPool = new ArrayList<Thread>();
         List<Thread> consumerPool = new ArrayList<Thread>();
 
         for(int i = 0; i < 2; i++){
-            Thread producerThread = new Thread(new ProducerImpl());
-            producerThread.run();
+            Thread producerThread = new Thread(new Producer());
+            producerThread.start();
             producerPool.add(producerThread);
         }
 
         for(int i = 0; i < 5; i++){
             Thread consumerThread = new Thread(new ConsumerImpl());
-            consumerThread.run();
+            consumerThread.start();
             consumerPool.add(consumerThread);
         }
+
+        producerPool.get(0).join();
     }
 }
