@@ -4,27 +4,26 @@ import java.util.concurrent.ArrayBlockingQueue;
  * Created by mnoe on 29.11.2016.
  */
 public class Producer implements Runnable {
-    private static Object consumerLock = new Object() {
-    };
-    private static ArrayBlockingQueue<Consumable> consumables = new ArrayBlockingQueue<Consumable>(Producer.MAX_CONSUMABLES);
-
     public static final int MAX_CONSUMABLES = 50;
-
-    private int maxProduce = 0;
-
-    public int getProducedCounter() {
-        return producedCounter;
-    }
-
-    private int producedCounter = 0;
     private boolean exitThread = false;
+    private int maxProduce = 0;
+    private int producedCounter = 0;
+    private static Object consumerLock = new Object() {};
+    private static ArrayBlockingQueue<Consumable> consumables = new ArrayBlockingQueue<Consumable>(Producer.MAX_CONSUMABLES);
 
     public Producer(int maxProduce) {
         this.maxProduce = maxProduce;
     }
 
-    static void queueForConsume(Consumer consumer) {
-        processConsumer(consumer);
+    public void run() {
+        while (!exitThread) {
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                // Ignore
+            }
+            produce();
+        }
     }
 
     private void produce() {
@@ -56,7 +55,7 @@ public class Producer implements Runnable {
         }
     }
 
-    private static void processConsumer(Consumer consumer) {
+    public static void processConsumer(Consumer consumer) {
         processConsumerCriticalSection(consumer);
 
         synchronized (consumables) {
@@ -84,18 +83,11 @@ public class Producer implements Runnable {
         }
     }
 
-    public void run() {
-        while (!exitThread) {
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException e) {
-                // Ignore
-            }
-            produce();
-        }
-    }
-
     public static int getConsumableCount(){
         return consumables.size();
+    }
+
+    public int getProducedCounter() {
+        return producedCounter;
     }
 }

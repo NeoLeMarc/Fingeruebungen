@@ -29,7 +29,7 @@ public class Consumer implements Runnable {
             } catch (InterruptedException e) {
                 // Ignore
             }
-            Producer.queueForConsume(this);
+            Producer.processConsumer(this);
         }
     }
 }
