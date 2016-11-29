@@ -12,45 +12,59 @@ import static org.hamcrest.Matchers.*;
  */
 
 @Test
-public class ProducerConsumerIntergrationTest {
+public class ProducerConsumerIntegrationTest {
 
     public void testProducerConsumer() throws InterruptedException {
-        List<Producer> producers = new ArrayList<Producer>();
-        List<Consumer> consumers = new ArrayList<Consumer>();
+        List<Producer> producers = new ArrayList<>();
+        List<Consumer> consumers = new ArrayList<>();
         runThreads(producers, consumers, 10, 4, 2, 5);
-        System.out.println("All threads terminated");
     }
 
     public void testThatAllMessagesAreConsumed() throws InterruptedException {
-        List<Producer> producers = new ArrayList<Producer>();
-        List<Consumer> consumers = new ArrayList<Consumer>();
+        List<Producer> producers = new ArrayList<>();
+        List<Consumer> consumers = new ArrayList<>();
         runThreads(producers, consumers, 10, 4, 2, 5);
-        System.out.println("All threads terminated");
-
         assertThat(Producer.getConsumableCount(), is(0));
+
+        int sumOfConsumedMessages = getSumOfConsumedMessages(consumers);
+        int sumOfProducedMessages = getSumOfProducedMessages(producers);
+
+        assertThat(sumOfConsumedMessages, is(sumOfProducedMessages));
+    }
+
+    private int getSumOfProducedMessages(List<Producer> producers) {
+        int sumOfProducedMessages = 0;
+        for(Producer producer: producers){
+            sumOfProducedMessages += producer.getProducedCounter();
+        }
+        return sumOfProducedMessages;
+    }
+
+    private int getSumOfConsumedMessages(List<Consumer> consumers) {
+        int sumOfConsumedMessages = 0;
+        for (Consumer consumer: consumers ) {
+            sumOfConsumedMessages += consumer.getConsumedCounter();
+        }
+        return sumOfConsumedMessages;
     }
 
     public void testThatHavingTooManyProducersLeadsToLeftOverMessages() throws InterruptedException {
-        List<Producer> producers = new ArrayList<Producer>();
-        List<Consumer> consumers = new ArrayList<Consumer>();
+        List<Producer> producers = new ArrayList<>();
+        List<Consumer> consumers = new ArrayList<>();
         runThreads(producers, consumers, 10, 4, 3, 5);
-        System.out.println("All threads terminated");
-
         assertThat(Producer.getConsumableCount(), greaterThan(0));
     }
     public void testThatHavingNotEnoughConsumersLeadsToLeftOverMessages() throws InterruptedException {
-        List<Producer> producers = new ArrayList<Producer>();
-        List<Consumer> consumers = new ArrayList<Consumer>();
+        List<Producer> producers = new ArrayList<>();
+        List<Consumer> consumers = new ArrayList<>();
         runThreads(producers, consumers, 10, 4, 2, 4);
-        System.out.println("All threads terminated");
-
         assertThat(Producer.getConsumableCount(), greaterThan(0));
     }
 
 
     private void runThreads(List<Producer> producers, List<Consumer> consumers, int produceCount, int consumeCount, int numberOfProducers, int numberOfConsumers) throws InterruptedException {
-        List<Thread> producerPool = new ArrayList<Thread>();
-        List<Thread> consumerPool = new ArrayList<Thread>();
+        List<Thread> producerPool = new ArrayList<>();
+        List<Thread> consumerPool = new ArrayList<>();
 
         for(int i = 0; i < numberOfProducers; i++){
             Producer producer = new Producer(produceCount);

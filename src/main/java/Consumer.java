@@ -11,7 +11,7 @@ public class Consumer implements Runnable {
         this.maxConsume = maxConsume;
     }
 
-    public int getConsumeCounter() {
+    public int getConsumedCounter() {
         return consumeCounter;
     }
 
@@ -20,19 +20,16 @@ public class Consumer implements Runnable {
         if (consumeCounter >= maxConsume) {
             exitThread = true;
         }
-        System.out.println("ConsumerThread" + Thread.currentThread().getId() + " - consumed consumable - " + consumable.toString() + " / Total: " + consumeCounter);
     }
 
     public void run() {
-        System.out.println("Started consumer thread with ID: " + Thread.currentThread().getId());
         while (!exitThread) {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(1);
             } catch (InterruptedException e) {
                 // Ignore
             }
             Producer.queueForConsume(this);
         }
-        System.out.println("Exiting consumer thread with ID: " + Thread.currentThread().getId());
     }
 }

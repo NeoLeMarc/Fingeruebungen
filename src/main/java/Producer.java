@@ -1,4 +1,3 @@
-import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 
 /**
@@ -12,7 +11,12 @@ public class Producer implements Runnable {
     public static final int MAX_CONSUMABLES = 50;
 
     private int maxProduce = 0;
-    private int producedCount = 0;
+
+    public int getProducedCounter() {
+        return producedCounter;
+    }
+
+    private int producedCounter = 0;
     private boolean exitThread = false;
 
     public Producer(int maxProduce) {
@@ -20,26 +24,22 @@ public class Producer implements Runnable {
     }
 
     static void queueForConsume(Consumer consumer) {
-        System.out.println("Consumer " + consumer + " queued for consume!");
         processConsumer(consumer);
     }
 
     private void produce() {
 
-        Consumable consumable = new Consumable() {
-        };
+        Consumable consumable = new Consumable() { };
 
         produceCriticalSection(consumable);
         synchronized (consumerLock) {
             consumerLock.notifyAll();
         }
 
-        producedCount++;
-        if (producedCount >= maxProduce) {
+        producedCounter++;
+        if (producedCounter >= maxProduce) {
             exitThread = true;
         }
-
-        System.out.println("Producer thread: " + Thread.currentThread().getId() + " just produced one consumable / Total: " + producedCount);
     }
 
     private void produceCriticalSection(Consumable consumable) {
@@ -85,16 +85,14 @@ public class Producer implements Runnable {
     }
 
     public void run() {
-        System.out.println("Started producer thread with ID: " + Thread.currentThread().getId());
         while (!exitThread) {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(1);
             } catch (InterruptedException e) {
                 // Ignore
             }
             produce();
         }
-        System.out.println("Exiting producer thread with ID: " + Thread.currentThread().getId());
     }
 
     public static int getConsumableCount(){
