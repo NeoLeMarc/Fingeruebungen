@@ -56,7 +56,6 @@ public class SimpleServer {
             for (Iterator<SimpleServerHandler> iterator = handlers.iterator(); iterator.hasNext(); ){
                 SimpleServerHandler handler = iterator.next();
                 handler.initiateShutdown();
-//                iterator.remove(); // Needed to prevent ConcurrentModificationException
                 try {
                     handler.joinThread();
                 } catch (InterruptedException e) {
