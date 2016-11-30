@@ -8,11 +8,13 @@ import java.net.Socket;
  * Created by mnoe on 30.11.2016.
  */
 public class SimpleServerHandler implements Runnable {
-    Socket socket;
-    PrintWriter out;
-    BufferedReader in;
-    SimpleServer simpleServer;
-    Thread thread;
+    private Socket socket;
+    private PrintWriter out;
+    private BufferedReader in;
+    private SimpleServer simpleServer;
+    private Thread thread;
+    private static SimpleServerHandler instanceForUnitTesting;
+
     boolean exitThread = false;
 
     public SimpleServerHandler(Socket socket, SimpleServer server) throws IOException {
@@ -89,5 +91,22 @@ public class SimpleServerHandler implements Runnable {
                 out.print("Unknown command: " + input);
                 break;
         }
+    }
+
+    public static SimpleServerHandler getInstance(Socket connectionSocket, SimpleServer simpleServer) throws IOException {
+        if(instanceForUnitTesting != null) {
+            instanceForUnitTesting.socket = connectionSocket;
+            instanceForUnitTesting.simpleServer = simpleServer;
+            return instanceForUnitTesting;
+        } else
+            return new SimpleServerHandler(connectionSocket, simpleServer);
+    }
+
+    void setInstanceForUnitTesting(SimpleServerHandler instanceForUnitTesting) {
+        this.instanceForUnitTesting = instanceForUnitTesting;
+    }
+
+    public void joinThread() throws InterruptedException {
+        thread.join();
     }
 }

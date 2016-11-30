@@ -6,21 +6,24 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.rmi.server.ExportException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Handler;
 
 /**
  * Created by mnoe on 30.11.2016.
  */
 public class SimpleServer {
     ServerSocket serverSocket;
-    List<SimpleServerHandler> handlers = new ArrayList<>();
+    List<SimpleServerHandler> handlers = new CopyOnWriteArrayList<>();
     boolean endServer = false;
 
     public SimpleServer(int port) throws IOException {
         serverSocket = new ServerSocket(port);
     }
 
-    synchronized void handlerShutdownCallback(SimpleServerHandler handler) {
+    void handlerShutdownCallback(SimpleServerHandler handler) {
         handlers.remove(handler);
     }
 
@@ -37,10 +40,8 @@ public class SimpleServer {
         try {
             while (!endServer) {
                 Socket connectionSocket = serverSocket.accept();
-                SimpleServerHandler handler = new SimpleServerHandler(connectionSocket, this);
-                synchronized (this) {
-                    handlers.add(handler);
-                }
+                SimpleServerHandler handler = SimpleServerHandler.getInstance(connectionSocket, this);
+                handlers.add(handler);
                 System.out.println("New connection, starting new handler thread");
             }
         } catch(SocketException e) {
@@ -51,10 +52,13 @@ public class SimpleServer {
                 throw e;
             }
         } finally {
-            for (SimpleServerHandler handler: handlers ) {
+
+            for (Iterator<SimpleServerHandler> iterator = handlers.iterator(); iterator.hasNext(); ){
+                SimpleServerHandler handler = iterator.next();
                 handler.initiateShutdown();
+//                iterator.remove(); // Needed to prevent ConcurrentModificationException
                 try {
-                    handler.thread.join();
+                    handler.joinThread();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
